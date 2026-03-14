@@ -9,6 +9,10 @@ from flask import Flask, render_template, request, jsonify, redirect, session, s
 import io
 
 app = Flask(__name__)
+import base64
+
+UPLOAD_FOLDER = 'static/photos'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.secret_key = "supersecretkey"
 
 # ==============================
@@ -37,6 +41,7 @@ def init_db():
             latitude REAL NOT NULL,
             longitude REAL NOT NULL,
             datetime TEXT NOT NULL
+            photo TEXT
         )
     ''')
     conn.commit()
@@ -110,11 +115,21 @@ def mark_attendance():
         conn.close()
         return jsonify({"status": "duplicate"})
 
+    # Photo Save
+    photo_filename = ""
+    photo = data.get('photo')
+    if photo:
+        photo_data = photo.split(',')[1]
+        photo_bytes = base64.b64decode(photo_data)
+        photo_filename = f"{name}_{today_date}.jpg"
+        with open(f"static/photos/{photo_filename}", 'wb') as f:
+            f.write(photo_bytes)
+
     # Save Attendance
     cursor.execute('''
-        INSERT INTO attendance (name, latitude, longitude, datetime)
-        VALUES (?, ?, ?, ?)
-    ''', (name, lat, lon, current_datetime))
+        INSERT INTO attendance (name, latitude, longitude, datetime, photo)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (name, lat, lon, current_datetime, photo_filename))
 
     conn.commit()
     conn.close()
