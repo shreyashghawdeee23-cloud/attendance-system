@@ -40,7 +40,7 @@ def init_db():
             name TEXT NOT NULL,
             latitude REAL NOT NULL,
             longitude REAL NOT NULL,
-            datetime TEXT NOT NULL
+            datetime TEXT NOT NULL,
             photo TEXT
         )
     ''')
