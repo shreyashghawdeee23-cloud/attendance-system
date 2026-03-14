@@ -20,7 +20,7 @@ app.secret_key = "supersecretkey"
 # ==============================
 COLLEGE_LAT = 21.212938
 COLLEGE_LON = 78.973262
-RADIUS_METERS = 3000 
+RADIUS_METERS = 5000
 
 # ==============================
 # Admin Credentials
