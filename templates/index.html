@@ -75,7 +75,6 @@ function capturePhoto() {
     captureBtn.style.display = 'none';
     retakeBtn.style.display = 'block';
 
-    // Camera band karo
     if (videoStream) {
         videoStream.getTracks().forEach(track => track.stop());
     }
@@ -104,6 +103,8 @@ function markAttendance() {
         return;
     }
 
+    document.getElementById("result").innerHTML = "<span class='text-info'>📍 Getting location...</span>";
+
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {
             fetch("/mark", {
@@ -131,6 +132,15 @@ function markAttendance() {
                         "<span class='text-danger'>❌ Outside college area</span>";
                 }
             });
+        },
+        function(error) {
+            document.getElementById("result").innerHTML =
+                "<span class='text-danger'>❌ Location error: " + error.message + "</span>";
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
         });
     } else {
         alert("Location not supported");
