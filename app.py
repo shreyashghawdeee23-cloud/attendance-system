@@ -20,7 +20,7 @@ app.secret_key = "supersecretkey"
 # ==============================
 COLLEGE_LAT = 21.212938
 COLLEGE_LON = 78.973262
-RADIUS_METERS = 300
+RADIUS_METERS = 3000 
 
 # ==============================
 # Admin Credentials
@@ -165,8 +165,9 @@ def dashboard():
     cursor = conn.cursor()
 
     # Sab records lao
-    cursor.execute('SELECT name, latitude, longitude, datetime FROM attendance ORDER BY datetime DESC')
-    records = cursor.fetchall()
+    cursor.execute('SELECT name, latitude, longitude, datetime, photo FROM attendance ORDER BY datetime DESC')
+    raw_records = cursor.fetchall()
+    records = list(enumerate(raw_records, start=1))
 
     # Date-wise count for graph
     cursor.execute('''
