@@ -20,7 +20,7 @@ app.secret_key = "supersecretkey"
 # ==============================
 COLLEGE_LAT = 21.212938
 COLLEGE_LON = 78.973262
-RADIUS_METERS = 5000
+RADIUS_METERS = 250
 
 # ==============================
 # Admin Credentials
@@ -119,11 +119,7 @@ def mark_attendance():
     photo_filename = ""
     photo = data.get('photo')
     if photo:
-        photo_data = photo.split(',')[1]
-        photo_bytes = base64.b64decode(photo_data)
-        photo_filename = f"{name}_{today_date}.jpg"
-        with open(f"static/photos/{photo_filename}", 'wb') as f:
-            f.write(photo_bytes)
+        photo_filename = photo  # base64 directly save karo
 
     # Save Attendance
     cursor.execute('''
