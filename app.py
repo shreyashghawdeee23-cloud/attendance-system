@@ -95,7 +95,7 @@ def mark_attendance():
     print("Distance:", distance)
 
     if distance > RADIUS_METERS:
-        return jsonify({"status": "fail"})
+    return jsonify({"status": "fail", "distance": round(distance)})
 
     today_date = datetime.now().strftime("%Y-%m-%d")
     current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
