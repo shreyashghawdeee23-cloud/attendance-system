@@ -1,18 +1,15 @@
-print("SQLite VERSION LOADED")
+print("PostgreSQL VERSION LOADED")
 
 import os
-import sqlite3
+import psycopg2
 import csv
 import math
+import base64
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, redirect, session, send_file
 import io
 
 app = Flask(__name__)
-import base64
-
-UPLOAD_FOLDER = 'static/photos'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.secret_key = "supersecretkey"
 
 # ==============================
@@ -29,14 +26,19 @@ ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "1234"
 
 # ==============================
-# Database Setup
+# Database Connection
 # ==============================
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+def get_conn():
+    return psycopg2.connect(DATABASE_URL)
+
 def init_db():
-    conn = sqlite3.connect('attendance.db')
+    conn = get_conn()
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS attendance (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             name TEXT NOT NULL,
             latitude REAL NOT NULL,
             longitude REAL NOT NULL,
@@ -47,7 +49,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-init_db()  # App start hote hi DB ready ho jata hai
+init_db()
 
 # ==============================
 # Distance Function (Haversine)
@@ -100,17 +102,16 @@ def mark_attendance():
     today_date = datetime.now().strftime("%Y-%m-%d")
     current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    conn = sqlite3.connect('attendance.db')
+    conn = get_conn()
     cursor = conn.cursor()
 
     # Duplicate Check
     cursor.execute('''
         SELECT * FROM attendance
-        WHERE name = ? AND DATE(datetime) = ?
+        WHERE name = %s AND DATE(datetime) = %s
     ''', (name, today_date))
-    
-    existing = cursor.fetchone()
 
+    existing = cursor.fetchone()
     if existing:
         conn.close()
         return jsonify({"status": "duplicate"})
@@ -119,12 +120,12 @@ def mark_attendance():
     photo_filename = ""
     photo = data.get('photo')
     if photo:
-        photo_filename = photo  # base64 directly save karo
+        photo_filename = photo
 
     # Save Attendance
     cursor.execute('''
         INSERT INTO attendance (name, latitude, longitude, datetime, photo)
-        VALUES (?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s)
     ''', (name, lat, lon, current_datetime, photo_filename))
 
     conn.commit()
@@ -157,15 +158,13 @@ def dashboard():
     if not session.get('admin'):
         return redirect('/admin')
 
-    conn = sqlite3.connect('attendance.db')
+    conn = get_conn()
     cursor = conn.cursor()
 
-    # Sab records lao
     cursor.execute('SELECT name, latitude, longitude, datetime, photo FROM attendance ORDER BY datetime DESC')
     raw_records = cursor.fetchall()
     records = list(enumerate(raw_records, start=1))
 
-    # Date-wise count for graph
     cursor.execute('''
         SELECT DATE(datetime), COUNT(*)
         FROM attendance
@@ -175,31 +174,25 @@ def dashboard():
     date_data = cursor.fetchall()
     conn.close()
 
-    labels = [row[0] for row in date_data]
+    labels = [str(row[0]) for row in date_data]
     values = [row[1] for row in date_data]
 
-    return render_template(
-        'dashboard.html',
-        records=records,
-        labels=labels,
-        values=values
-    )
+    return render_template('dashboard.html', records=records, labels=labels, values=values)
 
 # ==============================
-# Download CSV (DB se export)
+# Download CSV
 # ==============================
 @app.route('/download')
 def download_excel():
     if not session.get('admin'):
         return redirect('/admin')
 
-    conn = sqlite3.connect('attendance.db')
+    conn = get_conn()
     cursor = conn.cursor()
     cursor.execute('SELECT name, latitude, longitude, datetime FROM attendance')
     rows = cursor.fetchall()
     conn.close()
 
-    # Memory me CSV banao (file save nahi hogi)
     output = io.StringIO()
     writer = csv.writer(output)
     writer.writerow(["Name", "Latitude", "Longitude", "Date Time"])

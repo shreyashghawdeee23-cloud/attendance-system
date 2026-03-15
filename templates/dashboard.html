@@ -43,8 +43,8 @@
                     <td>{{ i }}</td>
                     <td>
                         {% if row[4] %}
-                        <img src="/static/photos/{{ row[4] }}" width="50" height="50"
-                             style="border-radius:50%; object-fit:cover;">
+                        <img src="{{ row[4] }}" width="50" height="50"
+                            style="border-radius:50%; object-fit:cover;">
                         {% else %}
                         <span class="text-muted">No photo</span>
                         {% endif %}
