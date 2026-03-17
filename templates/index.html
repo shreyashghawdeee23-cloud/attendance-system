@@ -16,6 +16,23 @@
             <input type="text" id="name" class="form-control" placeholder="Your Name">
         </div>
 
+        <div class="mb-3">
+            <label class="form-label">Department</label>
+            <select id="department" class="form-select">
+                <option value="">Select Department</option>
+                <option value="Computer Engineering">Computer Engineering</option>
+                <option value="Electrical Engineering">Electrical Engineering</option>
+                <option value="Mechanical Engineering">Mechanical Engineering</option>
+                <option value="Civil Engineering">Civil Engineering</option>
+                <option value="Electronics Engineering">Electronics Engineering</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">USN Number</label>
+            <input type="text" id="usn" class="form-control" placeholder="USN Number">
+        </div>
+
         <!-- Camera Section -->
         <div class="mb-3">
             <label class="form-label">📸 Take Photo</label>
@@ -91,12 +108,22 @@ function retakePhoto() {
 }
 
 function markAttendance() {
-    let name = document.getElementById("name").value;
+let name = document.getElementById("name").value;
+let department = document.getElementById("department").value;
+let usn = document.getElementById("usn").value;
 
-    if (!name) {
-        alert("Enter your name");
-        return;
-    }
+if (!name) {
+    alert("Enter your name");
+    return;
+}
+if (!department) {
+    alert("Select your department");
+    return;
+}
+if (!usn) {
+    alert("Enter your USN number");
+    return;
+}
 
     if (!photoData) {
         alert("Please take a photo first!");
@@ -112,6 +139,8 @@ function markAttendance() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     name: name,
+                    department: department,
+                    usn: usn,
                     latitude: position.coords.latitude,
                     longitude: position.coords.longitude,
                     photo: photoData

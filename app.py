@@ -43,7 +43,9 @@ def init_db():
             latitude REAL NOT NULL,
             longitude REAL NOT NULL,
             datetime TEXT NOT NULL,
-            photo TEXT
+            photo TEXT,
+            department TEXT,
+            usn TEXT
         )
     ''')
     conn.commit()
@@ -85,6 +87,8 @@ def mark_attendance():
     name = data.get('name')
     lat = data.get('latitude')
     lon = data.get('longitude')
+    department = data.get('department', '')
+    usn = data.get('usn', '')
 
     if not name or lat is None or lon is None:
         return jsonify({"status": "error", "message": "Incomplete data"}), 400
@@ -124,9 +128,9 @@ def mark_attendance():
 
     # Save Attendance
     cursor.execute('''
-        INSERT INTO attendance (name, latitude, longitude, datetime, photo)
-        VALUES (%s, %s, %s, %s, %s)
-    ''', (name, lat, lon, current_datetime, photo_filename))
+        INSERT INTO attendance (name, latitude, longitude, datetime, photo, department, usn)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+    ''', (name, lat, lon, current_datetime, photo_filename, department, usn))
 
     conn.commit()
     conn.close()
@@ -161,7 +165,7 @@ def dashboard():
     conn = get_conn()
     cursor = conn.cursor()
 
-    cursor.execute('SELECT name, latitude, longitude, datetime, photo FROM attendance ORDER BY datetime DESC')
+    cursor.execute('SELECT name, latitude, longitude, datetime, photo, department, usn FROM attendance ORDER BY datetime DESC')
     raw_records = cursor.fetchall()
     records = list(enumerate(raw_records, start=1))
 
