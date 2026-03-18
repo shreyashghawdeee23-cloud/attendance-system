@@ -28,7 +28,7 @@ ADMIN_PASSWORD = "1234"
 # ==============================
 # Database Connection
 # ==============================
-DATABASE_URL = os.environ.get('DATABASE_URL')
+DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://attendance_db_h7f7_user:F4ejWXtUjuchTIHIP4Pedwe9z3hLJrap@dpg-d6r7sec50q8c73btn090-a/attendance_db_h7f7')
 
 def get_conn():
     return psycopg2.connect(DATABASE_URL)
