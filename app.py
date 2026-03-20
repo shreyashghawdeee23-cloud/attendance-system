@@ -1,7 +1,7 @@
 print("PostgreSQL VERSION LOADED")
 
 import os
-import psycopg2
+import pg8000.native
 import csv
 import math
 import base64
@@ -31,7 +31,7 @@ ADMIN_PASSWORD = "1234"
 DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://attendance_db_h7f7_user:F4ejWXtUjuchTIHIP4Pedwe9z3hLJrap@dpg-d6r7sec50q8c73btn090-a/attendance_db_h7f7')
 
 def get_conn():
-    return psycopg2.connect(DATABASE_URL)
+    return pg8000.native.Connection.from_url(DATABASE_URL)
 
 def init_db():
     conn = get_conn()
